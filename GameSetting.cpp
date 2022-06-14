@@ -81,9 +81,9 @@ void InterfaceInfo(void)
 	GotoXY(kInfoboxBorderX + 18, 6); cout << "最高分数：";
 	GotoXY(kInfoboxBorderX + 18, 9); cout << "当前用时：";
 	GotoXY(kInfoboxBorderX + 8, 18); cout << "操作说明：";
-	GotoXY(kInfoboxBorderX + 12, 21); cout << "向上：W      向下：S";
-	GotoXY(kInfoboxBorderX + 12, 23); cout << "向左：A      向右：D";
-	GotoXY(kInfoboxBorderX + 12, 25); cout << "加速：,      减速：.";
+	GotoXY(kInfoboxBorderX + 12, 21); cout << "向上：W 或 ↑   向下：S 或 ↓";
+	GotoXY(kInfoboxBorderX + 12, 23); cout << "向左：A 或 ←   向右：D 或 ↓";
+	GotoXY(kInfoboxBorderX + 12, 25); cout << "加速：,        减速：.";
 	GotoXY(kInfoboxBorderX + 8, 30); cout << "当前游戏难度：";
 	if (game_difficulty->GetDifficulty() == '1') cout << "简单";
 	else if (game_difficulty->GetDifficulty() == '2') cout << "正常";
