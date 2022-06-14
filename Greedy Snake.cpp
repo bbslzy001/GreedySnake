@@ -4,52 +4,33 @@
 
 using namespace std;
 
-bool game_judge = true;
-
-Grade* game_grade;
+Status* game_status;
+Difficulty* game_difficulty;
 Time* game_time;
+Grade* game_grade;
 Snake* game_snake;
 
 int main(void)
 {
 	InitialGame();
-	InstantiateInfo();
+	InstantiateData();
 
-	//用于判断是否重新开始
-	char restart = '0';
-
-	//重新开始
 	do
 	{
-		//重新开始清屏
-		if (restart == '1')
-		{
-			system("cls");
-			restart = '0';
-		}
+		Initial();
 
-		/*游戏各项初始化*/
-		//定义本局游戏速度
-		int speed = InitialInterface();
-		InitialJudge();
-		InitialInfo();
-		InitialFood();
-
-		//游戏运行
-		while (game_judge)
+		while (game_status->GetIsRun())
 		{
 			game_time->UpdateTime();
-			if (_kbhit()) game_snake->SnakeStatus();
+			if (_kbhit()) game_snake->UpdateSnakeDirection();
 			game_snake->UpdateSnake();
-			Sleep(speed);
+			Sleep(game_difficulty->GetDifficulty());
 		}
 
-		EndOfMsg();
-		ResetJudge();
 		Reset();
-
-		while (restart != '1' && restart != '2') restart = _getch();
-	} while (restart == '1');
+		EndOfMsg();
+		game_status->IfRestart();
+	} while (game_status->GetIsRestart());
 
 	system("cls");
 

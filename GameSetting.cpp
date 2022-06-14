@@ -1,19 +1,29 @@
-#include "Constant.h"
+ï»¿#include "Constant.h"
 #include "GameSetting.h"
 
 using namespace std;
 
-//
-static char choice = '0';
-//
+
+
+//æ¸¸æˆè›‡èº«ã€é£Ÿç‰©ä½ç½®
 static int** judge;
-//ÓÎÏ·½áÊøÅĞ¶Ï
+
+//æ¸¸æˆç»“æŸåˆ¤æ–­
 extern bool game_judge;
 
-/*¶¨ÒåÈ«¾Ö¶ÔÏóÖ¸Õë*/
-extern Grade* game_grade;
+/*å®šä¹‰å…¨å±€å¯¹è±¡æŒ‡é’ˆ*/
+//çŠ¶æ€ç±»å¯¹è±¡
+extern Status* game_status;
+//éš¾åº¦ç±»å¯¹è±¡
+extern Difficulty* game_difficulty;
+//æ—¶é—´ç±»å¯¹è±¡
 extern Time* game_time;
+//åˆ†æ•°ç±»å¯¹è±¡
+extern Grade* game_grade;
+//è›‡ç±»å¯¹è±¡
 extern Snake* game_snake;
+
+
 
 void SetWindowSize(void)
 {
@@ -26,9 +36,9 @@ void HideCursor(void)
 {
 	HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 	CONSOLE_CURSOR_INFO CursorInfo;
-	GetConsoleCursorInfo(handle, &CursorInfo);  //»ñÈ¡¿ØÖÆÌ¨¹â±êĞÅÏ¢
-	CursorInfo.bVisible = false;  //Òş²Ø¿ØÖÆÌ¨¹â±ê
-	SetConsoleCursorInfo(handle, &CursorInfo);  //ÉèÖÃ¿ØÖÆÌ¨¹â±ê×´Ì¬
+	GetConsoleCursorInfo(handle, &CursorInfo);  //è·å–æ§åˆ¶å°å…‰æ ‡ä¿¡æ¯
+	CursorInfo.bVisible = false;  //éšè—æ§åˆ¶å°å…‰æ ‡
+	SetConsoleCursorInfo(handle, &CursorInfo);  //è®¾ç½®æ§åˆ¶å°å…‰æ ‡çŠ¶æ€
 }
 
 void InitialGame(void)
@@ -37,90 +47,48 @@ void InitialGame(void)
 	HideCursor();
 }
 
-void MainInterface(void)
+void InstantiateData(void)
 {
-	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 7);
-	cout << "ÇëÑ¡ÔñÓÎÏ·ÄÑ¶È£º" << endl;
-	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 5);
-	cout << "1)ÓéÀÖ" << endl;
-	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 3);
-	cout << "2)Õı³£" << endl;
-	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 1);
-	cout << "3)µØÓü" << endl;
-	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 + 1);
-	cout << "ÇëÊäÈëÄúµÄÑ¡Ôñ-> ";
-}
-
-
-int ChoiceDifficulty(void)
-{
-	while (1)
-	{
-		choice = _getch();
-		if (choice == '1') return 400;
-		if (choice == '2') return 200;
-		if (choice == '3') return 80;
-	}
+	game_status = new Status;
+	game_difficulty = new Difficulty;
+	game_time = new Time;
+	game_grade = new Grade;
+	game_snake = new Snake;
 }
 
 void BuildBoundary(void)
 {
-	for (int i = 0; i < kBorderWidthNum; ++i) printf("\033[47;37m¡ö\033[0m");  //¸Ã·ûºÅ¿í¶ÈÕ¼2¸ß¶ÈÕ¼1
+	for (int i = 0; i < kBorderWidthNum; ++i) printf("\033[47;37mâ– \033[0m");  //è¯¥ç¬¦å·å®½åº¦å 2é«˜åº¦å 1
 	cout << endl;
 	for (int i = 1; i <= kSceneHeight; ++i)
 	{
-		printf("\033[47;37m¡ö\033[0m");
+		printf("\033[47;37mâ– \033[0m");
 		GotoXY(kInfoboxBorderX, i);
-		printf("\033[40;37m¡ö\033[0m");
-		//´°¿ÚÃ¿ĞĞÓĞ0~129¹²130¸öÎ»ÖÃ£¬Îª½«·ûºÅ´òÓ¡ÔÚÃ¿ĞĞÄ©Î²£¬Ğè½«¹â±êÒÆÖÁ128,½«128ºÍ129·ÅÖÃÒ»¸ö¡ö
+		printf("\033[40;37mâ– \033[0m");
+		//çª—å£æ¯è¡Œæœ‰0~129å…±130ä¸ªä½ç½®ï¼Œä¸ºå°†ç¬¦å·æ‰“å°åœ¨æ¯è¡Œæœ«å°¾ï¼Œéœ€å°†å…‰æ ‡ç§»è‡³128,å°†128å’Œ129æ”¾ç½®ä¸€ä¸ªâ– 
 		GotoXY(kWindowWidth - 2, i);
-		printf("\033[47;37m¡ö\033[0m\n");
+		printf("\033[47;37mâ– \033[0m\n");
 	}
-	for (int i = 0; i < kBorderWidthNum; ++i) printf("\033[47;37m¡ö\033[0m");
-	//½«0~13¹²14µÄ¸ß¶È·Ö³ÉÒ»¸ñ
+	for (int i = 0; i < kBorderWidthNum; ++i) printf("\033[47;37mâ– \033[0m");
+	//å°†0~13å…±14çš„é«˜åº¦åˆ†æˆä¸€æ ¼
 	GotoXY(kInfoboxBorderX + 2, 13);
-	for (int i = 0; i < kBorderWidthNum - kBorderHeightNum - 1; ++i) printf("\033[40;37m¡ö\033[0m");
+	for (int i = 0; i < kBorderWidthNum - kBorderHeightNum - 1; ++i) printf("\033[40;37mâ– \033[0m");
 }
 
-void InterfaceInformation(void)
+void InterfaceInfo(void)
 {
-	GotoXY(kInfoboxBorderX + 18, 3); cout << "µ±Ç°·ÖÊı£º";
-	GotoXY(kInfoboxBorderX + 18, 6); cout << "×î¸ß·ÖÊı£º";
-	GotoXY(kInfoboxBorderX + 18, 9); cout << "µ±Ç°ÓÃÊ±£º";
-	GotoXY(kInfoboxBorderX + 8, 18); cout << "²Ù×÷ËµÃ÷£º";
-	GotoXY(kInfoboxBorderX + 12, 21); cout << "ÏòÉÏ£ºW      ÏòÏÂ£ºS";
-	GotoXY(kInfoboxBorderX + 12, 23); cout << "Ïò×ó£ºA      ÏòÓÒ£ºD";
-	GotoXY(kInfoboxBorderX + 12, 25); cout << "¼ÓËÙ£º,      ¼õËÙ£º.";
-	GotoXY(kInfoboxBorderX + 8, 30); cout << "µ±Ç°ÓÎÏ·ÄÑ¶È£º";
-	if (choice == '1') cout << "ÓéÀÖ";
-	else if (choice == '2') cout << "Õı³£";
-	else if (choice == '3') cout << "µØÓü";
+	GotoXY(kInfoboxBorderX + 18, 3); cout << "å½“å‰åˆ†æ•°ï¼š";
+	GotoXY(kInfoboxBorderX + 18, 6); cout << "æœ€é«˜åˆ†æ•°ï¼š";
+	GotoXY(kInfoboxBorderX + 18, 9); cout << "å½“å‰ç”¨æ—¶ï¼š";
+	GotoXY(kInfoboxBorderX + 8, 18); cout << "æ“ä½œè¯´æ˜ï¼š";
+	GotoXY(kInfoboxBorderX + 12, 21); cout << "å‘ä¸Šï¼šW      å‘ä¸‹ï¼šS";
+	GotoXY(kInfoboxBorderX + 12, 23); cout << "å‘å·¦ï¼šA      å‘å³ï¼šD";
+	GotoXY(kInfoboxBorderX + 12, 25); cout << "åŠ é€Ÿï¼š,      å‡é€Ÿï¼š.";
+	GotoXY(kInfoboxBorderX + 8, 30); cout << "å½“å‰æ¸¸æˆéš¾åº¦ï¼š";
+	if (game_difficulty->GetDifficulty() == '1') cout << "ç®€å•";
+	else if (game_difficulty->GetDifficulty() == '2') cout << "æ­£å¸¸";
+	else cout << "å›°éš¾";
 }
-
-int InitialInterface(void)
-{
-	MainInterface();
-	int speed = ChoiceDifficulty();
-	system("cls");  //ÇåÆÁ
-	BuildBoundary();
-	InterfaceInformation();
-	return speed;
-}
-
-void InstantiateInfo(void)
-{
-	game_grade = new Grade;
-	game_time = new Time;
-	game_snake = new Snake;
-}
-
-void InitialInfo(void)
-{
-	game_grade->InitialGrade();
-	game_time->InitialTime();
-	game_snake->InitialSnake();
-}
-
 
 void InitialJudge(void)
 {
@@ -129,19 +97,40 @@ void InitialJudge(void)
 	{
 		judge[i] = new int[100]();
 	}
+	return;
 }
 
 void InitialFood(void)
 {
-	//Ëæ»úÊı¸ñÊ½£ºnumber = (rand()%(maxValue - minValue +1)) + minValue;
+	//éšæœºæ•°æ ¼å¼ï¼šnumber = ( rand() % (maxValue - minValue + 1)) + minValue;
 	int x, y;
 	do
 	{
-		srand(time(NULL) ^ _getpid());  //´´½¨Ëæ»úÖÖ×Ó£¬·ñÔòÃ¿´ÎÔËĞĞ³ÌĞò²»ÊÇËæ»ú
-		x = rand() % (kSceneWidth + 1 - 2 + 1) + 2;  //´Ó2µ½77 (2, IB_width_value + 1)
-		y = rand() % (kSceneHeight - 1 + 1) + 1;	 //´Ó1µ½38 (1, IB_height_value)
-	} while (judge[x][y] == 1);  //±£Ö¤Ê³Îï²»»á¸²¸ÇÉß
+		srand(time(NULL) ^ _getpid());  //åˆ›å»ºéšæœºç§å­ï¼Œå¦åˆ™æ¯æ¬¡è¿è¡Œç¨‹åºä¸æ˜¯éšæœº
+		x = rand() % ((kSceneWidth + 1) - 2 + 1) + 2;  //ä»2åˆ°77 (2, kSceneWidth + 1)
+		y = rand() % (kSceneHeight - 1 + 1) + 1;	 //ä»1åˆ°38 (1, kSceneHeight)
+	} while (judge[x][y] == 1);  //ä¿è¯é£Ÿç‰©ä¸ä¼šè¦†ç›–è›‡
 	GotoXY(x, y); printf("\033[40;31m$\033[0m"); judge[x][y] = 2;
+}
+
+void Initial(void)
+{
+	system("cls");
+	/*æ¸¸æˆçŠ¶æ€ä¿¡æ¯æ¨¡å—*/
+	game_status->InitialStatus();
+	/*æ¯å±€æ¸¸æˆéš¾åº¦é€‰æ‹©æ¨¡å—*/
+	game_difficulty->ChoiceDifficultyInterface();
+	game_difficulty->ChoiceDifficulty();
+	system("cls");
+	/*æ¯å±€æ¸¸æˆç•Œé¢æ¨¡å—*/
+	BuildBoundary();
+	InterfaceInfo();
+	/*æ¯å±€æ¸¸æˆåå°ä¿¡æ¯æ¨¡å—*/
+	InitialJudge();
+	game_grade->InitialGrade();
+	game_time->InitialTime();
+	game_snake->InitialSnake();
+	InitialFood();
 }
 
 void GotoXY(int x, int y)
@@ -158,23 +147,23 @@ void GradeUpSound(void)
 
 void EndOfMsg(void)
 {
-	printf("\a");  //ÓÎÏ·½áÊøÉùÒô
+	printf("\a");  //æ¸¸æˆç»“æŸå£°éŸ³
 	int grade = game_grade->GetGrade();
 	int time = game_time->GetTime();
 	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 9);
 	cout << "G A M E   O V E R" << endl;
 	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 7);
-	cout << "ÓÎÏ·µÃ·Ö£º" << grade << endl;
+	cout << "æ¸¸æˆå¾—åˆ†ï¼š" << grade << endl;
 	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 5);
-	cout << "ÓÎÏ·ÓÃÊ±£º" << time / 60 << ":";
+	cout << "æ¸¸æˆç”¨æ—¶ï¼š" << time / 60 << ":";
 	if (time % 60 < 10) cout << "0" << time % 60;
 	else cout << time % 60;
 	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 3);
-	cout << "1)ÖØĞÂ¿ªÊ¼" << endl;
+	cout << "1)é‡æ–°å¼€å§‹" << endl;
 	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 1);
-	cout << "2)½áÊøÓÎÏ·" << endl;
+	cout << "2)ç»“æŸæ¸¸æˆ" << endl;
 	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 + 1);
-	cout << "ÇëÊäÈëÄúµÄÑ¡Ôñ-> ";
+	cout << "è¯·è¾“å…¥æ‚¨çš„é€‰æ‹©-> ";
 }
 
 void ResetJudge(void)
@@ -189,40 +178,111 @@ void ResetJudge(void)
 void Reset(void)
 {
 	game_grade->ResetGrade();
-	game_judge = true;
+	ResetJudge();
+	game_difficulty->ResetDifficulty();
 }
 
-//³õÊ¼»¯Ê±¼ä
+
+
+void Status::InitialStatus(void)
+{
+	is_restart_ = false;
+	is_run_ = true;
+}
+
+bool Status::GetIsRun(void)
+{
+	return is_run_;
+}
+
+bool Status::GetIsRestart(void)
+{
+	return is_restart_;
+}
+
+void Status::SetIsRun(bool status)
+{
+	is_run_ = status;
+}
+
+void Status::IfRestart(void)
+{
+	char is_restart = '0';
+	while (is_restart != '1' && is_restart != '2') is_restart = _getch();
+	if (is_restart == '1') is_restart_ = true;
+}
+
+
+
+void Difficulty::ChoiceDifficultyInterface(void)
+{
+	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 7);
+	cout << "è¯·é€‰æ‹©æ¸¸æˆéš¾åº¦ï¼š" << endl;
+	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 5);
+	cout << "1)ç®€å•" << endl;
+	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 3);
+	cout << "2)æ­£å¸¸" << endl;
+	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 1);
+	cout << "3)å›°éš¾" << endl;
+	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 + 1);
+	cout << "è¯·è¾“å…¥æ‚¨çš„é€‰æ‹©-> ";
+}
+
+void Difficulty::ChoiceDifficulty(void)
+{
+	while (1)
+	{
+		difficulty_choice_ = _getch();
+		if (difficulty_choice_ >= '1' && difficulty_choice_ <= '3') return;
+	}
+}
+
+int Difficulty::GetDifficulty(void)
+{
+	switch (difficulty_choice_)
+	{
+	case '1': return EASY;
+	case '2': return COMMON;
+	case '3': return DIFFICULT;
+	}
+}
+
+void Difficulty::ResetDifficulty(void)
+{
+	difficulty_choice_ = '0';
+}
+
+
+
 void Time::InitialTime(void)
 {
-	//»ñÈ¡³õÊ¼Ê±¼ä
+	//è·å–åˆå§‹æ—¶é—´
 	begin_time_ = clock();
-	//´òÓ¡ÓÃÊ±
+	//æ‰“å°ç”¨æ—¶
 	GotoXY(kInfoboxBorderX + 28, 9);
 	cout << current_time_ / 60 << ":" << current_time_ % 60;
 }
 
-//Ë¢ĞÂÊ±¼ä
 void Time::UpdateTime(void)
 {
-	//»ñÈ¡µ±Ç°Ê±¼ä
+	//è·å–å½“å‰æ—¶é—´
 	end_time_ = clock();
-	//¼ÆËãÓÃÊ±
+	//è®¡ç®—ç”¨æ—¶
 	current_time_ = (end_time_ - begin_time_) / 1000;
-	//´òÓ¡ÓÃÊ±
+	//æ‰“å°ç”¨æ—¶
 	GotoXY(kInfoboxBorderX + 28, 9);
 	cout << current_time_ / 60 << ":";
 	if (current_time_ % 60 < 10) cout << "0" << current_time_ % 60;
 	else cout << current_time_ % 60;
 }
 
-//»ñÈ¡±¾´ÎÊ±¼ä
 int Time::GetTime(void)
 {
 	return current_time_;
 }
 
-//³õÊ¼»¯·ÖÊı
+
+
 void Grade::InitialGrade(void)
 {
 	GotoXY(kInfoboxBorderX + 28, 3);
@@ -231,16 +291,15 @@ void Grade::InitialGrade(void)
 	cout << best_score_;
 }
 
-//¸üĞÂ·ÖÊı
 void Grade::UpdateGrade(void)
 {
 	thread th(GradeUpSound);
 	/*
-	ÒòÎªÔÚ´´½¨ÁËÏß³ÌºóÏß³Ì¿ªÊ¼Ö´ĞĞ,µ«ÊÇÖ÷Ïß³Ìmain()²¢Ã»ÓĞÍ£Ö¹½Å²½
-	ÈÔÈ»¼ÌĞøÖ´ĞĞÈ»ºóÍË³ö,´ËÊ±Ïß³Ì¶ÔÏó»¹ÊÇjoinableµÄÏß³ÌÈÔÈ»´æÔÚµ«
-	Ö¸ÏòËüµÄÏß³Ì¶ÔÏóÒÑ¾­Ïú»Ù£¬ËùÒÔ»áÅ×³öÒì³£¡£
+	å› ä¸ºåœ¨åˆ›å»ºäº†çº¿ç¨‹åçº¿ç¨‹å¼€å§‹æ‰§è¡Œ,ä½†æ˜¯ä¸»çº¿ç¨‹main()å¹¶æ²¡æœ‰åœæ­¢è„šæ­¥
+	ä»ç„¶ç»§ç»­æ‰§è¡Œç„¶åé€€å‡º,æ­¤æ—¶çº¿ç¨‹å¯¹è±¡è¿˜æ˜¯joinableçš„çº¿ç¨‹ä»ç„¶å­˜åœ¨ä½†
+	æŒ‡å‘å®ƒçš„çº¿ç¨‹å¯¹è±¡å·²ç»é”€æ¯ï¼Œæ‰€ä»¥ä¼šæŠ›å‡ºå¼‚å¸¸ã€‚
 	*/
-	th.detach();  //½«×ÓÏß³ÌÓëÖ÷Ïß³Ì¶ÀÁ¢¿ª£¬±£Ö¤Á½Õß»¥²»Ó°Ïì£¬·ñÔòÅ×³öÒì³£
+	th.detach();  //å°†å­çº¿ç¨‹ä¸ä¸»çº¿ç¨‹ç‹¬ç«‹å¼€ï¼Œä¿è¯ä¸¤è€…äº’ä¸å½±å“ï¼Œå¦åˆ™æŠ›å‡ºå¼‚å¸¸
 	++current_score_;
 	GotoXY(kInfoboxBorderX + 28, 3);
 	cout << current_score_;
@@ -252,47 +311,24 @@ void Grade::UpdateGrade(void)
 	}
 }
 
-//ÖØÖÃµ±Ç°·ÖÊı
 void Grade::ResetGrade(void)
 {
 	current_score_ = 0;
 }
 
-//»ñÈ¡±¾´Î·ÖÊı
 int Grade::GetGrade(void)
 {
 	return current_score_;
 }
 
-//ÓÎÏ·½áÊø
+
+
 void Snake::GameOver(void)
 {
 	system("cls");
-	game_judge = false;
+	game_status->SetIsRun(false);
 }
 
-//¸üĞÂÉß×´Ì¬
-void Snake::SnakeStatus(void)
-{
-	input_char_ = _getch();
-	switch (input_char_)
-	{
-	case 'w':
-	case 'W':
-		if (snake_status_ != DOWN) snake_status_ = UP; break;
-	case 's':
-	case 'S':
-		if (snake_status_ != UP) snake_status_ = DOWN; break;
-	case 'a':
-	case 'A':
-		if (snake_status_ != RIGHT) snake_status_ = LEFT; break;
-	case 'd':
-	case 'D':
-		if (snake_status_ != LEFT) snake_status_ = RIGHT; break;
-	}
-}
-
-//ÅĞ¶ÏÊÇ·ñÎªÊ³Îï
 bool Snake::JudgeFood(int x, int y)
 {
 	if (judge[x][y] == 2)
@@ -303,7 +339,6 @@ bool Snake::JudgeFood(int x, int y)
 	return false;
 }
 
-//ÅĞ¶ÏÊÇ·ñÎªÇ½»òÉí×Ó
 bool Snake::JudgeWallOrBody(int x, int y)
 {
 	if (x == 1 || y == 0 || x == kSceneWidth + 2 || y == kSceneHeight + 1) return true;
@@ -311,36 +346,82 @@ bool Snake::JudgeWallOrBody(int x, int y)
 	return false;
 }
 
-//³õÊ¼»¯Éß
+void Snake::InitialSnakeDirection(void)
+{
+	srand(time(NULL) ^ _getpid());  //åˆ›å»ºéšæœºç§å­ï¼Œå¦åˆ™æ¯æ¬¡è¿è¡Œç¨‹åºä¸æ˜¯éšæœº
+	snake_status_ = rand() % (4 - 1 + 1) + 1;  //ä»1åˆ°4ï¼ˆ1ï¼Œ4ï¼‰
+}
+
+int* Snake::InitialSnakeXY(void)
+{
+	int* xy = new int[2]();
+	srand(time(NULL) ^ _getpid());  //åˆ›å»ºéšæœºç§å­ï¼Œå¦åˆ™æ¯æ¬¡è¿è¡Œç¨‹åºä¸æ˜¯éšæœº
+	xy[0] = rand() % ((kSceneWidth - 4) - 7 + 1) + 7;  //ä»7åˆ°72 (7, kSceneWidth - 4)
+	xy[1] = rand() % ((kSceneHeight - 5) - 6 + 1) + 6;	 //ä»6åˆ°33 (1, kSceneHeight - 5)
+	return xy;
+}
+
 void Snake::InitialSnake(void)
 {
 	while (!snake.empty())
 	{
 		snake.pop();
 	}
-	snake_status_ = RIGHT;
-	snake.push(make_pair(10, 10));
-	snake.push(make_pair(11, 10));
-	snake.push(make_pair(12, 10));
-	//printf("\033[×Ö±³¾°ÑÕÉ«;×ÖÌåÑÕÉ«m×Ö·û´®\033[0m" );
+	InitialSnakeDirection();
+	int* xy = InitialSnakeXY();
+	int x = 0, y = 0;
+	switch (snake_status_)
+	{
+	case UP: y = 1; break;
+	case DOWN: y = -1; break;
+	case LEFT: x = 1; break;
+	case RIGHT: x = -1; break;
+	}
+	snake.push(make_pair(xy[0] + x + x, xy[1] + y + y));  //é˜Ÿåˆ—å…ˆè¿›å…ˆå‡ºï¼Œå°†è›‡å°¾ä½œä¸ºé˜Ÿå¤´ï¼ˆæ–¹ä¾¿å‡ºé˜Ÿï¼Œå³åˆ é™¤è›‡å°¾ï¼‰ï¼Œè›‡å¤´ä½œä¸ºé˜Ÿå°¾
+	snake.push(make_pair(xy[0] + x, xy[1] + y));
+	snake.push(make_pair(xy[0], xy[1]));
+	//printf("\033[å­—èƒŒæ™¯é¢œè‰²;å­—ä½“é¢œè‰²må­—ç¬¦ä¸²\033[0m" );
 	/*
-	×Ö±³¾°ÑÕÉ«·¶Î§: 40--49           ×ÖÑÕÉ«: 30--39
-	40: ºÚ                           30: ºÚ
-	41: ºì                           31: ºì
-	42: ÂÌ                           32: ÂÌ
-	43: »Æ                           33: »Æ
-	44: À¶                           34: À¶
-	45: ×Ï                           35: ×Ï
-	46: ÉîÂÌ                         36: ÉîÂÌ
-	47: °×É«                         37: °×É«
+	å­—èƒŒæ™¯é¢œè‰²èŒƒå›´: 40--49           å­—é¢œè‰²: 30--39
+	40: é»‘                           30: é»‘
+	41: çº¢                           31: çº¢
+	42: ç»¿                           32: ç»¿
+	43: é»„                           33: é»„
+	44: è“                           34: è“
+	45: ç´«                           35: ç´«
+	46: æ·±ç»¿                         36: æ·±ç»¿
+	47: ç™½è‰²                         37: ç™½è‰²
 	*/
-	GotoXY(10, 10); printf("\033[40;34m#\033[0m"); judge[10][10] = 1;
-	GotoXY(11, 10); printf("\033[40;34m#\033[0m"); judge[11][10] = 1;
-	GotoXY(12, 10); printf("\033[40;33m@\033[0m"); judge[12][10] = 1;
+	GotoXY(xy[0] + x + x, xy[1] + y + y); printf("\033[40;34m#\033[0m"); judge[xy[0] + x + x][xy[1] + y + y] = 1;
+	GotoXY(xy[0] + x, xy[1] + y); printf("\033[40;34m#\033[0m"); judge[xy[0] + x][xy[1] + y] = 1;
+	GotoXY(xy[0], xy[1]); printf("\033[40;33m@\033[0m"); judge[xy[0]][xy[1]] = 1;
 }
 
-//ÅĞ¶ÏÉßÍ·ÏÂÒ»¸öÎ»ÖÃ
-void Snake::UpdateSnakeByStatus(void)
+void Snake::UpdateSnakeDirection(void)
+{
+	input_char_ = _getch();
+	switch (input_char_)
+	{
+	case 'w':
+	case 'W':
+	case 72:
+		if (snake_status_ != DOWN) snake_status_ = UP; break;
+	case 's':
+	case 'S':
+	case 80:
+		if (snake_status_ != UP) snake_status_ = DOWN; break;
+	case 'a':
+	case 'A':
+	case 75:
+		if (snake_status_ != RIGHT) snake_status_ = LEFT; break;
+	case 'd':
+	case 'D':
+	case 77:
+		if (snake_status_ != LEFT) snake_status_ = RIGHT; break;
+	}
+}
+
+void Snake::UpdateSnake(void)
 {
 	int x = 0, y = 0;
 	switch (snake_status_)
@@ -357,24 +438,20 @@ void Snake::UpdateSnakeByStatus(void)
 	}
 	if (JudgeFood(snake.back().first + x, snake.back().second + y))
 	{
-		GotoXY(snake.back().first, snake.back().second); printf("\033[40;34m#\033[0m");  //½«Ô­ÉßÍ·¸ÄÎªÉßÉí
-		snake.push(make_pair(snake.back().first + x, snake.back().second + y));  //½«ĞÂÉßÍ·×ø±êÈë¶Ó
-		GotoXY(snake.back().first, snake.back().second); printf("\033[40;33m@\033[0m"); judge[snake.back().first][snake.back().second] = 1;
-		game_grade->UpdateGrade();
+		GotoXY(snake.back().first, snake.back().second); printf("\033[40;34m#\033[0m");  //é˜Ÿå°¾ä¸ºè›‡å¤´ï¼Œå°†åŸè›‡å¤´æ‰“å°ä¸ºè›‡èº«
+		snake.push(make_pair(snake.back().first + x, snake.back().second + y));  //å°†æ–°è›‡å¤´åæ ‡å…¥é˜Ÿ
+		GotoXY(snake.back().first, snake.back().second); printf("\033[40;33m@\033[0m");  //æ‰“å°æ–°è›‡å¤´
+		judge[snake.back().first][snake.back().second] = 1;  //ä¿å­˜è›‡å¤´ä½ç½®
+		game_grade->UpdateGrade();  //æ›´æ–°åˆ†æ•°
 	}
 	else
 	{
-		GotoXY(snake.back().first, snake.back().second); printf("\033[40;34m#\033[0m");
-		snake.push(make_pair(snake.back().first + x, snake.back().second + y));
-		GotoXY(snake.back().first, snake.back().second); printf("\033[40;33m@\033[0m"); judge[snake.back().first][snake.back().second] = 1;
-		GotoXY(snake.front().first, snake.front().second); printf(" "); judge[snake.front().first][snake.front().second] = 0;
-		snake.pop();
+		GotoXY(snake.back().first, snake.back().second); printf("\033[40;34m#\033[0m");  //é˜Ÿå°¾ä¸ºè›‡å¤´ï¼Œå°†åŸè›‡å¤´æ‰“å°ä¸ºè›‡èº«
+		snake.push(make_pair(snake.back().first + x, snake.back().second + y));  //å°†æ–°è›‡å¤´åæ ‡å…¥é˜Ÿ
+		GotoXY(snake.back().first, snake.back().second); printf("\033[40;33m@\033[0m");  //æ‰“å°æ–°è›‡å¤´
+		judge[snake.back().first][snake.back().second] = 1;  //ä¿å­˜è›‡å¤´ä½ç½®
+		GotoXY(snake.front().first, snake.front().second); printf(" ");  //é˜Ÿé¦–ä¸ºè›‡å°¾ï¼Œå°†åŸè›‡å°¾æ‰“å°ä¸ºç©ºç™½
+		judge[snake.front().first][snake.front().second] = 0;  //åˆ é™¤è›‡å°¾ä½ç½®
+		snake.pop();  //é˜Ÿåˆ—å…ˆè¿›å…ˆå‡ºï¼Œé˜Ÿå¤´ä¸ºè›‡å°¾ï¼Œå°†åŸè›‡å°¾åæ ‡å‡ºé˜Ÿ
 	}
-}
-
-//¸üĞÂÉß
-void Snake::UpdateSnake(void)
-{
-	//ÅĞ¶Ï²¢´òÓ¡ÉßÍ·µÄÏÂÒ»¸öÎ»ÖÃ
-	UpdateSnakeByStatus();
 }
