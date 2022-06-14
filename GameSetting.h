@@ -104,7 +104,8 @@ public:
 class Difficulty
 {
 private:
-	enum { EASY = 300, COMMON = 150, DIFFICULT = 75 };
+	enum { kXEASY = 90, kXCOMMON = 60, kXDIFFICULT = 30 };
+	enum { kYEASY = 180, kYCOMMON = 120, kYDIFFICULT = 60 };
 	char difficulty_choice_ = '0';
 public:
 	//打印难度选择界面，调用 GotoXY() 函数，由 InitialInterface() 函数调用
@@ -113,8 +114,11 @@ public:
 	//选择难度，由 InitialInterface() 函数调用
 	void ChoiceDifficulty(void);
 
-	//获取游戏难度，由 main() 函数调用
-	int GetDifficulty(void);
+	//获取游戏速度，由 main() 函数调用
+	int GetSpeed(void);
+
+	//获取游戏难度，由 InterfaceInfo() 函数调用
+	char GetDifficultyChoice(void);
 
 	//重置游戏难度，由 Reset() 函数调用
 	void ResetDifficulty(void);
@@ -166,8 +170,8 @@ class Snake
 {
 private:
 	std::queue<std::pair<int, int> > snake;
-	enum { UP = 1, DOWN = 2, LEFT = 3, RIGHT = 4 };
-	int snake_status_ = RIGHT;
+	enum { kUP = 1, kDOWN = 2, kLEFT = 3, kRIGHT = 4 };
+	int snake_status_ = kRIGHT;
 	char input_char_ = '0';
 public:
 	//判断是否为食物，调用 InitailFood() 函数，由 UpdateSnake() 函数调用
@@ -190,6 +194,9 @@ public:
 
 	//判断蛇头下一个位置并更新蛇，调用 JudgeFood()、JudgeWallOrBody() 函数，由 main() 函数调用
 	void UpdateSnake(void);
+
+	//判断蛇头方向是否为水平方向
+	bool IsXDirection(void);
 
 	//游戏结束，由 UpdateSnake() 函数调用
 	void GameOver(void);

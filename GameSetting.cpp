@@ -85,8 +85,8 @@ void InterfaceInfo(void)
 	GotoXY(kInfoboxBorderX + 12, 23); cout << "向左：A 或 ←   向右：D 或 ↓";
 	GotoXY(kInfoboxBorderX + 12, 25); cout << "加速：,        减速：.";
 	GotoXY(kInfoboxBorderX + 8, 30); cout << "当前游戏难度：";
-	if (game_difficulty->GetDifficulty() == '1') cout << "简单";
-	else if (game_difficulty->GetDifficulty() == '2') cout << "正常";
+	if (game_difficulty->GetDifficultyChoice() == '1') cout << "简单";
+	else if (game_difficulty->GetDifficultyChoice() == '2') cout << "正常";
 	else cout << "困难";
 }
 
@@ -237,14 +237,19 @@ void Difficulty::ChoiceDifficulty(void)
 	}
 }
 
-int Difficulty::GetDifficulty(void)
+int Difficulty::GetSpeed(void)
 {
 	switch (difficulty_choice_)
 	{
-	case '1': return EASY;
-	case '2': return COMMON;
-	case '3': return DIFFICULT;
+	case '1': if (game_snake->IsXDirection()) return kXEASY; else return kYEASY;
+	case '2': if (game_snake->IsXDirection()) return kXCOMMON; else return kYCOMMON;
+	case '3': if (game_snake->IsXDirection()) return kXDIFFICULT; else return kYDIFFICULT;
 	}
+}
+
+char Difficulty::GetDifficultyChoice(void)
+{
+	return difficulty_choice_;
 }
 
 void Difficulty::ResetDifficulty(void)
@@ -372,10 +377,10 @@ void Snake::InitialSnake(void)
 	int x = 0, y = 0;
 	switch (snake_status_)
 	{
-	case UP: y = 1; break;
-	case DOWN: y = -1; break;
-	case LEFT: x = 1; break;
-	case RIGHT: x = -1; break;
+	case kUP: y = 1; break;
+	case kDOWN: y = -1; break;
+	case kLEFT: x = 1; break;
+	case kRIGHT: x = -1; break;
 	}
 	snake.push(make_pair(xy[0] + x + x, xy[1] + y + y));  //队列先进先出，将蛇尾作为队头（方便出队，即删除蛇尾），蛇头作为队尾
 	snake.push(make_pair(xy[0] + x, xy[1] + y));
@@ -405,20 +410,26 @@ void Snake::UpdateSnakeDirection(void)
 	case 'w':
 	case 'W':
 	case 72:
-		if (snake_status_ != DOWN) snake_status_ = UP; break;
+		if (snake_status_ != kDOWN) snake_status_ = kUP; break;
 	case 's':
 	case 'S':
 	case 80:
-		if (snake_status_ != UP) snake_status_ = DOWN; break;
+		if (snake_status_ != kUP) snake_status_ = kDOWN; break;
 	case 'a':
 	case 'A':
 	case 75:
-		if (snake_status_ != RIGHT) snake_status_ = LEFT; break;
+		if (snake_status_ != kRIGHT) snake_status_ = kLEFT; break;
 	case 'd':
 	case 'D':
 	case 77:
-		if (snake_status_ != LEFT) snake_status_ = RIGHT; break;
+		if (snake_status_ != kLEFT) snake_status_ = kRIGHT; break;
 	}
+}
+
+bool Snake::IsXDirection(void)
+{
+	if (snake_status_ == kLEFT || snake_status_ == kRIGHT) return true;
+	else return false;
 }
 
 void Snake::UpdateSnake(void)
@@ -426,10 +437,10 @@ void Snake::UpdateSnake(void)
 	int x = 0, y = 0;
 	switch (snake_status_)
 	{
-	case UP: y = -1; break;
-	case DOWN: y = 1; break;
-	case LEFT: x = -1; break;
-	case RIGHT: x = 1; break;
+	case kUP: y = -1; break;
+	case kDOWN: y = 1; break;
+	case kLEFT: x = -1; break;
+	case kRIGHT: x = 1; break;
 	}
 	if (JudgeWallOrBody(snake.back().first + x, snake.back().second + y))
 	{

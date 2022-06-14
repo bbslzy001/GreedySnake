@@ -24,7 +24,7 @@ int main(void)
 			game_time->UpdateTime();
 			if (_kbhit()) game_snake->UpdateSnakeDirection();
 			game_snake->UpdateSnake();
-			Sleep(game_difficulty->GetDifficulty());
+			Sleep(game_difficulty->GetSpeed());
 		}
 
 		Reset();
