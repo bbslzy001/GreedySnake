@@ -48,7 +48,7 @@ void InitialFood(void);
 //对每局游戏进行初始化，
 //调用 ChoiceDifficultyInterface()、ChoiceDifficulty()、
 //BuildBoundary()、InterfaceInfo()、
-//InitialStatus()、InitialJudge()、InitialGrade()、InitialTime()、InitialSnake()、InitialFood() 函数
+//InitialStatus()、InitialJudge()、InitialGrade()、InitialTime()、InitialSnake()、InitialDifficulty()、InitialFood() 函数
 //由 main() 函数调用
 void Initial(void);
 
@@ -69,10 +69,7 @@ void GradeUpSound(void);
 //打印结束信息，调用 GetGrade()、GetTime()、GotoXY() 函数，由 main() 函数调用
 void EndOfMsg(void);
 
-//重置坐标信息，由 Reset() 函数调用
-void ResetJudge(void);
-
-//重置游戏后台信息，调用 ResetGrade()、ResetJudge()、ResetDifficulty() 函数
+//重置本局游戏的坐标信息，由 main() 函数调用
 void Reset(void);
 
 
@@ -108,20 +105,20 @@ private:
 	enum { kYEASY = 180, kYCOMMON = 120, kYDIFFICULT = 60 };
 	char difficulty_choice_ = '0';
 public:
-	//打印难度选择界面，调用 GotoXY() 函数，由 InitialInterface() 函数调用
-	void ChoiceDifficultyInterface(void);
+	//初始化游戏难度，由 Initial() 函数调用
+	void InitialDifficulty(void);
 
-	//选择难度，由 InitialInterface() 函数调用
-	void ChoiceDifficulty(void);
+	//打印游戏难度选择界面，调用 GotoXY() 函数，由 InitialInterface() 函数调用
+	void DifficultyChoiceInterface(void);
+
+	//选择游戏难度，由 InitialInterface() 函数调用
+	void ChooseDifficulty(void);
 
 	//获取游戏速度，由 main() 函数调用
 	int GetSpeed(void);
 
 	//获取游戏难度，由 InterfaceInfo() 函数调用
 	char GetDifficultyChoice(void);
-
-	//重置游戏难度，由 Reset() 函数调用
-	void ResetDifficulty(void);
 };
 
 
@@ -141,6 +138,9 @@ public:
 
 	//获取本次时间，由 EndOfMsg() 函数调用
 	int GetTime(void);
+
+	//重置时间，由 Reset() 函数调用
+	void ResetTime(void);
 };
 
 

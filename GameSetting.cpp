@@ -8,9 +8,6 @@ using namespace std;
 //游戏蛇身、食物位置
 static int** judge;
 
-//游戏结束判断
-extern bool game_judge;
-
 /*定义全局对象指针*/
 //状态类对象
 extern Status* game_status;
@@ -119,8 +116,8 @@ void Initial(void)
 	/*游戏状态信息模块*/
 	game_status->InitialStatus();
 	/*每局游戏难度选择模块*/
-	game_difficulty->ChoiceDifficultyInterface();
-	game_difficulty->ChoiceDifficulty();
+	game_difficulty->DifficultyChoiceInterface();
+	game_difficulty->ChooseDifficulty();
 	system("cls");
 	/*每局游戏界面模块*/
 	BuildBoundary();
@@ -130,6 +127,7 @@ void Initial(void)
 	game_grade->InitialGrade();
 	game_time->InitialTime();
 	game_snake->InitialSnake();
+	game_difficulty->InitialDifficulty();
 	InitialFood();
 }
 
@@ -166,20 +164,13 @@ void EndOfMsg(void)
 	cout << "请输入您的选择-> ";
 }
 
-void ResetJudge(void)
+void Reset(void)
 {
 	for (int i = 0; i < 100; ++i)
 	{
 		delete[]judge[i];
 	}
 	delete[]judge;
-}
-
-void Reset(void)
-{
-	game_grade->ResetGrade();
-	ResetJudge();
-	game_difficulty->ResetDifficulty();
 }
 
 
@@ -214,7 +205,12 @@ void Status::IfRestart(void)
 
 
 
-void Difficulty::ChoiceDifficultyInterface(void)
+void Difficulty::InitialDifficulty(void)
+{
+	difficulty_choice_ = '0';
+}
+
+void Difficulty::DifficultyChoiceInterface(void)
 {
 	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 - 7);
 	cout << "请选择游戏难度：" << endl;
@@ -228,9 +224,9 @@ void Difficulty::ChoiceDifficultyInterface(void)
 	cout << "请输入您的选择-> ";
 }
 
-void Difficulty::ChoiceDifficulty(void)
+void Difficulty::ChooseDifficulty(void)
 {
-	while (1)
+	while (true)
 	{
 		difficulty_choice_ = _getch();
 		if (difficulty_choice_ >= '1' && difficulty_choice_ <= '3') return;
@@ -252,15 +248,12 @@ char Difficulty::GetDifficultyChoice(void)
 	return difficulty_choice_;
 }
 
-void Difficulty::ResetDifficulty(void)
-{
-	difficulty_choice_ = '0';
-}
-
 
 
 void Time::InitialTime(void)
 {
+	//重置上一次的计时
+	current_time_ = 0;
 	//获取初始时间
 	begin_time_ = clock();
 	//打印用时
@@ -290,6 +283,7 @@ int Time::GetTime(void)
 
 void Grade::InitialGrade(void)
 {
+	current_score_ = 0;
 	GotoXY(kInfoboxBorderX + 28, 3);
 	cout << current_score_;
 	GotoXY(kInfoboxBorderX + 28, 6);
@@ -314,11 +308,6 @@ void Grade::UpdateGrade(void)
 		GotoXY(kInfoboxBorderX + 28, 6);
 		cout << best_score_;
 	}
-}
-
-void Grade::ResetGrade(void)
-{
-	current_score_ = 0;
 }
 
 int Grade::GetGrade(void)

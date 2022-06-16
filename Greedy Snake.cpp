@@ -27,8 +27,8 @@ int main(void)
 			Sleep(game_difficulty->GetSpeed());
 		}
 
-		Reset();
 		EndOfMsg();
+		Reset();
 		game_status->IfRestart();
 	} while (game_status->GetIsRestart());
 
