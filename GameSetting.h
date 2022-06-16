@@ -26,7 +26,7 @@ void HideCursor(void);
 //对游戏进行初始化，调用 SetWindowSize()、HideCursor() 函数
 void InitialGame(void);
 
-//实例化游戏难度、时间、分数、蛇信息
+//实例化游戏难度、时间、分数、蛇信息，由 main() 函数调用
 void InstantiateData(void);
 
 
@@ -56,7 +56,7 @@ void Initial(void);
 
 /*游戏运行所需*/
 
-//将光标移动到x,y位置
+//将光标移动到x,y位置，由多个函数调用
 void GotoXY(int x, int y);
 
 //得分声音反馈，由 UpdateGrade() 函数调用
@@ -189,7 +189,7 @@ public:
 	//判断蛇头下一个位置并更新蛇，调用 JudgeFood()、JudgeWallOrBody() 函数，由 main() 函数调用
 	void UpdateSnake(void);
 
-	//判断蛇头方向是否为水平方向
+	//判断蛇头方向是否为水平方向，由 GetSpeed() 函数调用
 	bool IsXDirection(void);
 
 	//游戏结束，由 UpdateSnake() 函数调用
