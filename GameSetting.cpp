@@ -5,18 +5,18 @@ using namespace std;
 
 
 
-//游戏蛇身、食物位置
-static int** judge;
-
 /*定义全局对象指针*/
+
+//分数类对象
+static Grade* game_grade;
 //状态类对象
 extern Status* game_status;
 //难度类对象
 extern Difficulty* game_difficulty;
 //时间类对象
 extern Time* game_time;
-//分数类对象
-extern Grade* game_grade;
+//判断类对象
+extern Judge* game_judge;
 //蛇类对象
 extern Snake* game_snake;
 
@@ -50,6 +50,7 @@ void InstantiateData(void)
 	game_difficulty = new Difficulty;
 	game_time = new Time;
 	game_grade = new Grade;
+	game_judge = new Judge;
 	game_snake = new Snake;
 }
 
@@ -87,29 +88,6 @@ void InterfaceInfo(void)
 	else cout << "困难";
 }
 
-void InitialJudge(void)
-{
-	judge = new int* [100]();
-	for (int i = 0; i < 100; ++i)
-	{
-		judge[i] = new int[100]();
-	}
-	return;
-}
-
-void InitialFood(void)
-{
-	//随机数格式：number = ( rand() % (maxValue - minValue + 1)) + minValue;
-	int x, y;
-	do
-	{
-		srand(time(NULL) ^ _getpid());  //创建随机种子，否则每次运行程序不是随机
-		x = rand() % ((kSceneWidth + 1) - 2 + 1) + 2;  //从2到77 (2, kSceneWidth + 1)
-		y = rand() % (kSceneHeight - 1 + 1) + 1;	 //从1到38 (1, kSceneHeight)
-	} while (judge[x][y] == 1);  //保证食物不会覆盖蛇
-	GotoXY(x, y); printf("\033[40;31m$\033[0m"); judge[x][y] = 2;
-}
-
 void Initial(void)
 {
 	system("cls");
@@ -123,12 +101,12 @@ void Initial(void)
 	BuildBoundary();
 	InterfaceInfo();
 	/*每局游戏后台信息模块*/
-	InitialJudge();
+	game_judge->InitialJudge();
 	game_grade->InitialGrade();
 	game_time->InitialTime();
 	game_snake->InitialSnake();
 	game_difficulty->InitialDifficulty();
-	InitialFood();
+	Food::InitialFood();
 }
 
 void GotoXY(int x, int y)
@@ -162,15 +140,6 @@ void EndOfMsg(void)
 	cout << "2)结束游戏" << endl;
 	GotoXY(kWindowWidth / 2 - 10, kWindowHeight / 2 + 1);
 	cout << "请输入您的选择-> ";
-}
-
-void Reset(void)
-{
-	for (int i = 0; i < 100; ++i)
-	{
-		delete[]judge[i];
-	}
-	delete[]judge;
 }
 
 
@@ -281,6 +250,76 @@ int Time::GetTime(void)
 
 
 
+void Food::InitialFood(void)
+{
+	//随机数格式：number = ( rand() % (maxValue - minValue + 1)) + minValue;
+	int x, y;
+	do
+	{
+		srand(time(NULL) ^ _getpid());  //创建随机种子，否则每次运行程序不是随机
+		x = rand() % ((kSceneWidth + 1) - 2 + 1) + 2;  //从2到77 (2, kSceneWidth + 1)
+		y = rand() % (kSceneHeight - 1 + 1) + 1;	 //从1到38 (1, kSceneHeight)
+	} while (game_judge->QueryXY(x, y) == 1);  //保证食物不会覆盖蛇
+	GotoXY(x, y); printf("\033[40;31m$\033[0m"); game_judge->UpdateXY(x, y, 2);
+}
+
+void Food::UpdateFood(int xx, int yy)
+{
+	//随机数格式：number = ( rand() % (maxValue - minValue + 1)) + minValue;
+	int x, y;
+	do
+	{
+		srand(time(NULL) ^ _getpid());  //创建随机种子，否则每次运行程序不是随机
+		x = rand() % ((kSceneWidth + 1) - 2 + 1) + 2;  //从2到77 (2, kSceneWidth + 1)
+		y = rand() % (kSceneHeight - 1 + 1) + 1;	 //从1到38 (1, kSceneHeight)
+	} while (game_judge->QueryXY(x, y) == 1 || (xx == x && yy == y));  //保证食物不会覆盖蛇或上一次的食物
+	GotoXY(x, y); printf("\033[40;31m$\033[0m"); game_judge->UpdateXY(x, y, 2);
+}
+
+bool Food::JudgeFood(int x, int y)
+{
+	if (game_judge->QueryXY(x, y) == 2)
+	{
+		//InitialFood();
+		UpdateFood(x, y);
+		return true;
+	}
+	return false;
+}
+
+
+
+void Judge::InitialJudge(void)
+{
+	judge_ = new int* [100]();
+	for (int i = 0; i < 100; ++i)
+	{
+		judge_[i] = new int[100]();
+	}
+	return;
+}
+
+void Judge::ResetJudge(void)
+{
+	for (int i = 0; i < 100; ++i)
+	{
+		delete[]judge_[i];
+	}
+	delete[]judge_;
+}
+
+int Judge::QueryXY(int x, int y)
+{
+	return judge_[x][y];
+}
+
+void Judge::UpdateXY(int x, int y, int value)
+{
+	judge_[x][y] = value;
+}
+
+
+
 void Grade::InitialGrade(void)
 {
 	current_score_ = 0;
@@ -323,20 +362,10 @@ void Snake::GameOver(void)
 	game_status->SetIsRun(false);
 }
 
-bool Snake::JudgeFood(int x, int y)
-{
-	if (judge[x][y] == 2)
-	{
-		InitialFood();
-		return true;
-	}
-	return false;
-}
-
 bool Snake::JudgeWallOrBody(int x, int y)
 {
 	if (x == 1 || y == 0 || x == kSceneWidth + 2 || y == kSceneHeight + 1) return true;
-	if (judge[x][y] == 1) return true;
+	if (game_judge->QueryXY(x, y) == 1) return true;
 	return false;
 }
 
@@ -386,9 +415,9 @@ void Snake::InitialSnake(void)
 	46: 深绿                         36: 深绿
 	47: 白色                         37: 白色
 	*/
-	GotoXY(xy[0] + x + x, xy[1] + y + y); printf("\033[40;34m#\033[0m"); judge[xy[0] + x + x][xy[1] + y + y] = 1;
-	GotoXY(xy[0] + x, xy[1] + y); printf("\033[40;34m#\033[0m"); judge[xy[0] + x][xy[1] + y] = 1;
-	GotoXY(xy[0], xy[1]); printf("\033[40;33m@\033[0m"); judge[xy[0]][xy[1]] = 1;
+	GotoXY(xy[0] + x + x, xy[1] + y + y); printf("\033[40;34m#\033[0m"); game_judge->UpdateXY(xy[0] + x + x, xy[1] + y + y, 1);
+	GotoXY(xy[0] + x, xy[1] + y); printf("\033[40;34m#\033[0m"); game_judge->UpdateXY(xy[0] + x, xy[1] + y, 1);
+	GotoXY(xy[0], xy[1]); printf("\033[40;33m@\033[0m"); game_judge->UpdateXY(xy[0], xy[1], 1);
 }
 
 void Snake::UpdateSnakeDirection(void)
@@ -436,12 +465,12 @@ void Snake::UpdateSnake(void)
 		GameOver();
 		return;
 	}
-	if (JudgeFood(snake.back().first + x, snake.back().second + y))
+	if (Food::JudgeFood(snake.back().first + x, snake.back().second + y))
 	{
 		GotoXY(snake.back().first, snake.back().second); printf("\033[40;34m#\033[0m");  //队尾为蛇头，将原蛇头打印为蛇身
 		snake.push(make_pair(snake.back().first + x, snake.back().second + y));  //将新蛇头坐标入队
 		GotoXY(snake.back().first, snake.back().second); printf("\033[40;33m@\033[0m");  //打印新蛇头
-		judge[snake.back().first][snake.back().second] = 1;  //保存蛇头位置
+		game_judge->UpdateXY(snake.back().first, snake.back().second, 1);  //保存蛇头位置
 		game_grade->UpdateGrade();  //更新分数
 	}
 	else
@@ -449,9 +478,9 @@ void Snake::UpdateSnake(void)
 		GotoXY(snake.back().first, snake.back().second); printf("\033[40;34m#\033[0m");  //队尾为蛇头，将原蛇头打印为蛇身
 		snake.push(make_pair(snake.back().first + x, snake.back().second + y));  //将新蛇头坐标入队
 		GotoXY(snake.back().first, snake.back().second); printf("\033[40;33m@\033[0m");  //打印新蛇头
-		judge[snake.back().first][snake.back().second] = 1;  //保存蛇头位置
+		game_judge->UpdateXY(snake.back().first, snake.back().second, 1);  //保存蛇头位置
 		GotoXY(snake.front().first, snake.front().second); printf(" ");  //队首为蛇尾，将原蛇尾打印为空白
-		judge[snake.front().first][snake.front().second] = 0;  //删除蛇尾位置
+		game_judge->UpdateXY(snake.front().first, snake.front().second, 0);  //删除蛇尾位置
 		snake.pop();  //队列先进先出，队头为蛇尾，将原蛇尾坐标出队
 	}
 }

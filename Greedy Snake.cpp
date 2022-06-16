@@ -7,7 +7,7 @@ using namespace std;
 Status* game_status;
 Difficulty* game_difficulty;
 Time* game_time;
-Grade* game_grade;
+Judge* game_judge;
 Snake* game_snake;
 
 int main(void)
@@ -28,7 +28,7 @@ int main(void)
 		}
 
 		EndOfMsg();
-		Reset();
+		game_judge->ResetJudge();
 		game_status->IfRestart();
 	} while (game_status->GetIsRestart());
 

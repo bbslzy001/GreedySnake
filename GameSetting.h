@@ -26,7 +26,7 @@ void HideCursor(void);
 //对游戏进行初始化，调用 SetWindowSize()、HideCursor() 函数
 void InitialGame(void);
 
-//实例化游戏难度、时间、分数、蛇信息，由 main() 函数调用
+//实例化游戏难度、时间、分数、判断、蛇信息，由 main() 函数调用
 void InstantiateData(void);
 
 
@@ -38,12 +38,6 @@ void BuildBoundary(void);
 
 //初始化游戏右侧信息，调用 GotoXY()、GetDifficulty() 函数，由 Initial() 函数调用
 void InterfaceInfo(void);
-
-//初始化对蛇与食物坐标的判断信息，由 Initial() 函数调用
-void InitialJudge(void);
-
-//初始化食物，调用 GotoXY() 函数，由 Initial() 函数调用
-void InitialFood(void);
 
 //对每局游戏进行初始化，
 //调用 ChoiceDifficultyInterface()、ChoiceDifficulty()、
@@ -68,9 +62,6 @@ void GradeUpSound(void);
 
 //打印结束信息，调用 GetGrade()、GetTime()、GotoXY() 函数，由 main() 函数调用
 void EndOfMsg(void);
-
-//重置本局游戏的坐标信息，由 main() 函数调用
-void Reset(void);
 
 
 
@@ -142,6 +133,40 @@ public:
 
 
 
+class Judge
+{
+private:
+	int** judge_;
+public:
+	//初始化对蛇与食物坐标的判断信息，由 Initial() 函数调用
+	void InitialJudge(void);
+
+	//重置本局游戏的坐标信息，由 main() 函数调用
+	void ResetJudge(void);
+
+	//查询Judge中某个坐标的信息，并将值返回，由多个函数调用
+	int QueryXY(int x, int y);
+
+	//更新Judge中某个坐标，由多个函数调用
+	void UpdateXY(int x, int y, int value);
+};
+
+
+class Food
+{
+public:
+	//初始化食物，调用 GotoXY() 函数，由 Initial() 函数调用
+	static void InitialFood(void);
+
+	//更新食物，调用 GotoXY() 函数，由 JudgeFood() 函数调用
+	static void UpdateFood(int xx, int yy);
+
+	//判断是否为食物，调用 InitailFood() 函数，由 UpdateSnake() 函数调用
+	static bool JudgeFood(int x, int y);
+};
+
+
+
 class Grade
 {
 private:
@@ -168,9 +193,6 @@ private:
 	int snake_status_ = kRIGHT;
 	char input_char_ = '0';
 public:
-	//判断是否为食物，调用 InitailFood() 函数，由 UpdateSnake() 函数调用
-	bool JudgeFood(int x, int y);
-
 	//判断是否为墙或身子，由 UpdateSnake() 函数调用
 	bool JudgeWallOrBody(int x, int y);
 
@@ -186,7 +208,7 @@ public:
 	//更新蛇头方向，由 main() 函数调用
 	void UpdateSnakeDirection(void);
 
-	//判断蛇头下一个位置并更新蛇，调用 JudgeFood()、JudgeWallOrBody() 函数，由 main() 函数调用
+	//判断蛇头下一个位置并更新蛇，调用 JudgeFood()、JudgeWallOrBody()、GameOver() 函数，由 main() 函数调用
 	void UpdateSnake(void);
 
 	//判断蛇头方向是否为水平方向，由 GetSpeed() 函数调用
