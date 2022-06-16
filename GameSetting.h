@@ -138,9 +138,6 @@ public:
 
 	//获取本次时间，由 EndOfMsg() 函数调用
 	int GetTime(void);
-
-	//重置时间，由 Reset() 函数调用
-	void ResetTime(void);
 };
 
 
@@ -156,9 +153,6 @@ public:
 
 	//更新分数，调用 GotoXY() 函数，由 UpdateSnake() 函数调用
 	void UpdateGrade(void);
-
-	//重置当前分数，由 Reset() 函数调用
-	void ResetGrade(void);
 
 	//获取本次分数，由 EndOfMsg() 函数调用
 	int GetGrade(void);
