@@ -94,6 +94,7 @@ void Initial(void)
 	/*游戏状态信息模块*/
 	game_status->InitialStatus();
 	/*每局游戏难度选择模块*/
+	game_difficulty->InitialDifficulty();
 	game_difficulty->DifficultyChoiceInterface();
 	game_difficulty->ChooseDifficulty();
 	system("cls");
@@ -105,7 +106,6 @@ void Initial(void)
 	game_grade->InitialGrade();
 	game_time->InitialTime();
 	game_snake->InitialSnake();
-	game_difficulty->InitialDifficulty();
 	Food::InitialFood();
 }
 

@@ -99,10 +99,10 @@ public:
 	//初始化游戏难度，由 Initial() 函数调用
 	void InitialDifficulty(void);
 
-	//打印游戏难度选择界面，调用 GotoXY() 函数，由 InitialInterface() 函数调用
+	//打印游戏难度选择界面，调用 GotoXY() 函数，由 Initial() 函数调用
 	void DifficultyChoiceInterface(void);
 
-	//选择游戏难度，由 InitialInterface() 函数调用
+	//选择游戏难度，由 Initial() 函数调用
 	void ChooseDifficulty(void);
 
 	//获取游戏速度，由 main() 函数调用
